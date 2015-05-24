@@ -1,0 +1,9 @@
+[submodule "buildroot"]
+	path = buildroot
+	url = git://git.buildroot.net/buildroot
+[submodule "batman-adv-legacy"]
+	path = batman-adv-legacy
+	url = git@github.com:hwhw/batman-adv-legacy.git
+[submodule "linux"]
+	path = linux
+	url = git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git

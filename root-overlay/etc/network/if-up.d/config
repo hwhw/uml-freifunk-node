@@ -1,0 +1,42 @@
+#!/bin/sh
+
+source /lib/kernel-params.sh
+INET=${inet_iface:=eth0}
+MESH=${batman_mesh:=eth2}
+
+if [ "$batman_version" == "14" ]; then
+    SUFFIX=14
+fi
+
+case $IFACE in
+    bat0)
+        [ -d /sys/class/net/$IFACE ] || (
+            ip link add dummy-$IFACE type dummy &&
+            echo $IFACE > /sys/class/net/dummy-$IFACE/batman_adv$SUFFIX/mesh_iface
+            )
+        [ -d /sys/class/net/$MESH ] &&
+            ip link set dev $MESH up &&
+            echo $IFACE > /sys/class/net/$MESH/batman_adv$SUFFIX/mesh_iface
+        [ -n "$batman_role" ] && echo $batman_role > /sys/class/net/$IFACE/mesh/gw_mode
+        echo ${batman_interval:=5000} > /sys/class/net/$IFACE/mesh/orig_interval
+        [ -n "$batman_mac" ] && ip link set dev $IFACE address $batman_mac
+        ip link set dev $IFACE up
+        ifup br-client
+        start-stop-daemon -S -b -q -p /var/run/alfred$SUFFIX.pid --exec /usr/sbin/alfred$SUFFIX -- -i br-client -b $IFACE
+        start-stop-daemon -S -b -q -p /var/run/batadv-vis$SUFFIX.pid --exec /usr/sbin/batadv-vis$SUFFIX -- -i $IFACE -s
+        ;;
+    br-client)
+        brctl addbr $IFACE
+        [ -d /sys/class/net/bat0 ] && brctl addif $IFACE bat0
+        [ -n "$batman_mac" ] && ip link set dev $IFACE address $batman_mac
+        ip link set dev br-client up
+        echo 2 > /proc/sys/net/ipv6/conf/$IFACE/accept_ra
+        [ -n "$batman_inner" ] && [ -d /sys/class/net/$batman_inner ] &&
+            ip link set dev $batman_inner up &&
+            brctl addif $IFACE $batman_inner
+        ;;
+    $INET)
+        [ -n "$inet_mac" ] && ip link set dev $IFACE address $inet_mac
+        udhcpc -i eth0 -x hostname:$(hostname)
+        ;;
+esac

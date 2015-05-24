@@ -1,0 +1,26 @@
+diff -ru batctl-2013.4.0/debug.h batctl-2013.4.0.N/debug.h
+--- batctl-2013.4.0/debug.h	2013-10-13 23:43:09.000000000 +0200
++++ batctl-2013.4.0.N/debug.h	2015-05-24 00:18:51.442169879 +0200
+@@ -20,7 +20,7 @@
+  */
+ 
+ 
+-#define DEBUG_BATIF_PATH_FMT "%s/batman_adv/%s"
++#define DEBUG_BATIF_PATH_FMT "%s/batman_adv14/%s"
+ #define DEBUG_VIS_DATA "vis_data"
+ #define DEBUG_TRANSTABLE_GLOBAL "transtable_global"
+ #define DEBUG_LOG "log"
+diff -ru batctl-2013.4.0/sys.h batctl-2013.4.0.N/sys.h
+--- batctl-2013.4.0/sys.h	2013-10-13 23:43:09.000000000 +0200
++++ batctl-2013.4.0.N/sys.h	2015-05-24 00:18:38.195502661 +0200
+@@ -28,8 +28,8 @@
+ #define SYS_GW_BW "gw_bandwidth"
+ #define SYS_IFACE_PATH "/sys/class/net"
+ #define SYS_IFACE_DIR SYS_IFACE_PATH"/%s/"
+-#define SYS_MESH_IFACE_FMT SYS_IFACE_PATH"/%s/batman_adv/mesh_iface"
+-#define SYS_IFACE_STATUS_FMT SYS_IFACE_PATH"/%s/batman_adv/iface_status"
++#define SYS_MESH_IFACE_FMT SYS_IFACE_PATH"/%s/batman_adv14/mesh_iface"
++#define SYS_IFACE_STATUS_FMT SYS_IFACE_PATH"/%s/batman_adv14/iface_status"
+ 
+ enum batctl_settings_list {
+ 	BATCTL_SETTINGS_ORIG_INTERVAL,

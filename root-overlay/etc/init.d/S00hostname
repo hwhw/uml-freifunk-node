@@ -1,0 +1,23 @@
+#!/bin/sh
+case "$1" in
+  start)
+        source /lib/kernel-params.sh && (
+            if [ -z "$hostname" ]; then
+                hostname="testbed-$bat_id"
+            fi
+            hostname $hostname
+            echo "127.0.0.1 localhost $hostname" > /etc/hosts
+            echo "::1 localhost $hostname" >> /etc/hosts
+        )
+        ;;
+  stop)
+        ;;
+  restart|reload)
+        start
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?

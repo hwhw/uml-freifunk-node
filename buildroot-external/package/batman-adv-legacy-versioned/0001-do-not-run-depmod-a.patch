@@ -1,0 +1,12 @@
+diff --git a/Makefile b/Makefile
+index ec88bd9..fc207f5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -58,7 +58,6 @@ clean:
+ 
+ install: config
+ 	$(MAKE) -C $(KERNELPATH) M=$(PWD) PWD=$(PWD) INSTALL_MOD_DIR=updates/net/batman-adv14/ modules_install
+-	depmod -a
+ 
+ config:
+ 	$(PWD)/gen-compat-autoconf.sh $(PWD)/compat-autoconf.h

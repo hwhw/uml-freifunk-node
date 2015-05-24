@@ -1,0 +1,40 @@
+diff -ru alfred-2015.0/batadv_query.c alfred-2015.0.N/batadv_query.c
+--- alfred-2015.0/batadv_query.c	2015-04-28 20:44:03.000000000 +0200
++++ alfred-2015.0.N/batadv_query.c	2015-05-24 10:58:10.333768327 +0200
+@@ -31,7 +31,7 @@
+ #include <sys/types.h>
+ #include "debugfs.h"
+ 
+-#define DEBUG_BATIF_PATH_FMT "%s/batman_adv/%s"
++#define DEBUG_BATIF_PATH_FMT "%s/batman_adv14/%s"
+ #define DEBUG_TRANSTABLE_GLOBAL "transtable_global"
+ #define DEBUG_ORIGINATORS "originators"
+ 
+diff -ru alfred-2015.0/vis/vis.c alfred-2015.0.N/vis/vis.c
+--- alfred-2015.0/vis/vis.c	2015-04-28 20:44:03.000000000 +0200
++++ alfred-2015.0.N/vis/vis.c	2015-05-24 10:58:54.997103521 +0200
+@@ -325,7 +325,7 @@
+ 	char path[1024];
+ 	struct vis_list_entry *v_entry;
+ 
+-	snprintf(path, sizeof(path), "/sys/kernel/debug/batman_adv/%s/originators", globals->interface);
++	snprintf(path, sizeof(path), "/sys/kernel/debug/batman_adv14/%s/originators", globals->interface);
+ 	fbuf = read_file(path);
+ 	if (!fbuf)
+ 		return -1;
+diff -ru alfred-2015.0/vis/vis.h alfred-2015.0.N/vis/vis.h
+--- alfred-2015.0/vis/vis.h	2015-04-28 20:44:03.000000000 +0200
++++ alfred-2015.0.N/vis/vis.h	2015-05-24 10:58:10.333768327 +0200
+@@ -37,9 +37,9 @@
+ #define UPDATE_INTERVAL				10
+ 
+ #define SYS_IFACE_PATH				"/sys/class/net"
+-#define DEBUG_BATIF_PATH_FMT			"%s/batman_adv/%s"
+-#define SYS_MESH_IFACE_FMT			SYS_IFACE_PATH"/%s/batman_adv/mesh_iface"
+-#define SYS_IFACE_STATUS_FMT			SYS_IFACE_PATH"/%s/batman_adv/iface_status"
++#define DEBUG_BATIF_PATH_FMT			"%s/batman_adv14/%s"
++#define SYS_MESH_IFACE_FMT			SYS_IFACE_PATH"/%s/batman_adv14/mesh_iface"
++#define SYS_IFACE_STATUS_FMT			SYS_IFACE_PATH"/%s/batman_adv14/iface_status"
+ 
+ 
+ enum opmode {
