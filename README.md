@@ -1,6 +1,8 @@
 # uml-freifunk-node
 User mode linux based system with support for batman-adv (v14, v15), fastd etc.
 
+In its current configuration, it needs VDE2 installed for networking.
+
 To build, first initialize and update all the submodules and download kernel:
 ```
  ./prepare.sh
