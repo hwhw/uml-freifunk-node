@@ -1,3 +1,3 @@
 #!/bin/sh
 source /lib/kernel-params.sh
-[ -x /etc/hostconfig/$hostname ] && exec /etc/hostconfig/$hostname
+[ -x /etc/hostconfig/$hostname ] && exec /etc/hostconfig/$hostname "$@"
