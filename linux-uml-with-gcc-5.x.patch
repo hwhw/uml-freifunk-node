@@ -1,0 +1,114 @@
+diff --git a/arch/um/Makefile b/arch/um/Makefile
+index 17d4460..098ab33 100644
+--- a/arch/um/Makefile
++++ b/arch/um/Makefile
+@@ -68,9 +68,10 @@ KBUILD_CFLAGS += $(CFLAGS) $(CFLAGS-y) -D__arch_um__ \
+ 
+ KBUILD_AFLAGS += $(ARCH_INCLUDE)
+ 
+-USER_CFLAGS = $(patsubst $(KERNEL_DEFINES),,$(patsubst -D__KERNEL__,,\
+-	$(patsubst -I%,,$(KBUILD_CFLAGS)))) $(ARCH_INCLUDE) $(MODE_INCLUDE) \
+-	$(filter -I%,$(CFLAGS)) -D_FILE_OFFSET_BITS=64 -idirafter include
++USER_CFLAGS = $(patsubst $(KERNEL_DEFINES),,$(patsubst -I%,,$(KBUILD_CFLAGS))) \
++		$(ARCH_INCLUDE) $(MODE_INCLUDE) $(filter -I%,$(CFLAGS)) \
++		-D_FILE_OFFSET_BITS=64 -idirafter include \
++		-D__KERNEL__ -D__UM_HOST__
+ 
+ #This will adjust *FLAGS accordingly to the platform.
+ include $(ARCH_DIR)/Makefile-os-$(OS)
+diff --git a/arch/um/drivers/mconsole.h b/arch/um/drivers/mconsole.h
+index 8b22535..44af737 100644
+--- a/arch/um/drivers/mconsole.h
++++ b/arch/um/drivers/mconsole.h
+@@ -7,7 +7,7 @@
+ #ifndef __MCONSOLE_H__
+ #define __MCONSOLE_H__
+ 
+-#ifndef __KERNEL__
++#ifdef __UM_HOST__
+ #include <stdint.h>
+ #define u32 uint32_t
+ #endif
+diff --git a/arch/um/include/shared/init.h b/arch/um/include/shared/init.h
+index b3906f8..233e259 100644
+--- a/arch/um/include/shared/init.h
++++ b/arch/um/include/shared/init.h
+@@ -40,28 +40,8 @@
+ typedef int (*initcall_t)(void);
+ typedef void (*exitcall_t)(void);
+ 
+-#ifndef __KERNEL__
+-#ifndef __section
+-# define __section(S) __attribute__ ((__section__(#S)))
+-#endif
+-
+-#if __GNUC__ == 3
+-
+-#if __GNUC_MINOR__ >= 3
+-# define __used			__attribute__((__used__))
+-#else
+-# define __used			__attribute__((__unused__))
+-#endif
+-
+-#else
+-#if __GNUC__ == 4
+-# define __used			__attribute__((__used__))
+-#endif
+-#endif
+-
+-#else
+ #include <linux/compiler.h>
+-#endif
++
+ /* These are for everybody (although not all archs will actually
+    discard it in modules) */
+ #define __init		__section(.init.text)
+@@ -131,7 +111,7 @@ extern struct uml_param __uml_setup_start, __uml_setup_end;
+ #define __uml_postsetup_call	__used __section(.uml.postsetup.init)
+ #define __uml_exit_call		__used __section(.uml.exitcall.exit)
+ 
+-#ifndef __KERNEL__
++#ifdef __UM_HOST__
+ 
+ #define __define_initcall(level,fn) \
+ 	static initcall_t __initcall_##fn __used \
+diff --git a/arch/um/include/shared/user.h b/arch/um/include/shared/user.h
+index cef0685..4cff19f 100644
+--- a/arch/um/include/shared/user.h
++++ b/arch/um/include/shared/user.h
+@@ -17,7 +17,7 @@
+ #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+ 
+ /* This is to get size_t */
+-#ifdef __KERNEL__
++#ifndef __UM_HOST__
+ #include <linux/types.h>
+ #else
+ #include <stddef.h>
+diff --git a/arch/x86/um/shared/sysdep/tls.h b/arch/x86/um/shared/sysdep/tls.h
+index 27cce00..a682db1 100644
+--- a/arch/x86/um/shared/sysdep/tls.h
++++ b/arch/x86/um/shared/sysdep/tls.h
+@@ -1,7 +1,7 @@
+ #ifndef _SYSDEP_TLS_H
+ #define _SYSDEP_TLS_H
+ 
+-# ifndef __KERNEL__
++#ifdef __UM_HOST__
+ 
+ /* Change name to avoid conflicts with the original one from <asm/ldt.h>, which
+  * may be named user_desc (but in 2.4 and in header matching its API was named
+@@ -22,11 +22,11 @@ typedef struct um_dup_user_desc {
+ #endif
+ } user_desc_t;
+ 
+-# else /* __KERNEL__ */
++#else /* __UM_HOST__ */
+ 
+ typedef struct user_desc user_desc_t;
+ 
+-# endif /* __KERNEL__ */
++#endif /* __UM_HOST__ */
+ 
+ extern int os_set_thread_area(user_desc_t *info, int pid);
+ extern int os_get_thread_area(user_desc_t *info, int pid);
