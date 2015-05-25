@@ -1,10 +1,9 @@
 # uml-freifunk-node
 User mode linux based system with support for batman-adv (v14, v15), fastd etc.
 
-To build, first initialize and update all the submodules:
+To build, first initialize and update all the submodules and download kernel:
 ```
- git submodule init
- git submodule update
+ ./prepare.sh
 ```
 
 Then build:
