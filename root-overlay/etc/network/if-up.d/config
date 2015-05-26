@@ -22,8 +22,10 @@ case $IFACE in
         [ -n "$batman_mac" ] && ip link set dev $IFACE address $batman_mac
         ip link set dev $IFACE up
         ifup br-client
-        start-stop-daemon -S -b -q -p /var/run/alfred$SUFFIX.pid --exec /usr/sbin/alfred$SUFFIX -- -i br-client -b $IFACE
-        start-stop-daemon -S -b -q -p /var/run/batadv-vis$SUFFIX.pid --exec /usr/sbin/batadv-vis$SUFFIX -- -i $IFACE -s
+        if [ -n "$alfred_send_data" ] && [ "$alfred_send_data" == "1" ]; then
+            start-stop-daemon -S -b -q -p /var/run/alfred$SUFFIX.pid --exec /usr/sbin/alfred$SUFFIX -- -i br-client -b $IFACE
+            start-stop-daemon -S -b -q -p /var/run/batadv-vis$SUFFIX.pid --exec /usr/sbin/batadv-vis$SUFFIX -- -i $IFACE -s
+        fi
         ;;
     br-client)
         brctl addbr $IFACE

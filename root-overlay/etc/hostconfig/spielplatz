@@ -1,0 +1,16 @@
+#!/bin/sh
+source /lib/kernel-params.sh
+case "$1" in
+  start)
+        logger "Hi there!"
+        ;;
+  stop)
+        ;;
+  restart|reload)
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?
