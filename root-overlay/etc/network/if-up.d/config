@@ -2,43 +2,103 @@
 
 source /lib/kernel-params.sh
 INET=${inet_iface:=eth0}
-MESH=${batman_mesh:=eth2}
 
-if [ "$batman_version" == "14" ]; then
+if [ "$batman_version" = "14" ]; then
     SUFFIX=14
 fi
 
 case $IFACE in
     bat0)
-        [ -d /sys/class/net/$IFACE ] || (
-            ip link add dummy-$IFACE type dummy &&
+        # always include one dummy interface into the mesh to keep it in existence
+        if [ ! -d /sys/class/net/$IFACE ]; then
+            ip link add dummy-$IFACE type dummy
             echo $IFACE > /sys/class/net/dummy-$IFACE/batman_adv$SUFFIX/mesh_iface
-            )
-        [ -d /sys/class/net/$MESH ] &&
-            ip link set dev $MESH up &&
-            echo $IFACE > /sys/class/net/$MESH/batman_adv$SUFFIX/mesh_iface
-        [ -n "$batman_role" ] && echo $batman_role > /sys/class/net/$IFACE/mesh/gw_mode
+        fi
+
+        # other interfaces that contribute to the Mesh:
+        (
+            local IFS=" ,\t\n"
+            for dev in $batman_mesh; do
+                if [ -d /sys/class/net/$dev ]; then
+                    ip link set dev $dev up
+                    echo $IFACE > /sys/class/net/$dev/batman_adv$SUFFIX/mesh_iface
+                fi
+            done
+        )
+
+        # Batman-adv config
+        if [ -n "$batman_role" ]; then
+            echo $batman_role > /sys/class/net/$IFACE/mesh/gw_mode
+        fi
         echo ${batman_interval:=5000} > /sys/class/net/$IFACE/mesh/orig_interval
-        [ -n "$batman_mac" ] && ip link set dev $IFACE address $batman_mac
+
+        # configure MAC address
+        if [ -n "$batman_mac" ]; then
+            ip link set dev $IFACE address $batman_mac
+        fi
+
+        # bring up the batman interface
         ip link set dev $IFACE up
+
+        # bring up bat0's client network
         ifup br-client
-        if [ -n "$alfred_send_data" ] && [ "$alfred_send_data" == "1" ]; then
+
+        if [ -n "$alfred_send_data" ] && [ "$alfred_send_data" = "1" ]; then
+            # start A.L.F.R.E.D
             start-stop-daemon -S -b -q -p /var/run/alfred$SUFFIX.pid --exec /usr/sbin/alfred$SUFFIX -- -i br-client -b $IFACE
+            # start batadv-vis
             start-stop-daemon -S -b -q -p /var/run/batadv-vis$SUFFIX.pid --exec /usr/sbin/batadv-vis$SUFFIX -- -i $IFACE -s
+            # make sure that alfred's data is updated every 4 Minutes:
+            (crontab -l; echo "*/4 * * * * /usr/bin/update-alfred.sh") | crontab
         fi
         ;;
+
     br-client)
+        # it's a bridge
         brctl addbr $IFACE
-        [ -d /sys/class/net/bat0 ] && brctl addif $IFACE bat0
-        [ -n "$batman_mac" ] && ip link set dev $IFACE address $batman_mac
+        # and it will bridge other networks to bat0
+        if [ -d /sys/class/net/bat0 ]; then
+            brctl addif $IFACE bat0
+        fi
+        # the bridge will use the same MAC as bat0
+        if [ -n "$batman_mac" ]; then
+            ip link set dev $IFACE address $batman_mac
+        fi
+
         ip link set dev br-client up
+
+        # the bridge will assign itself an IPv6 address
         echo 2 > /proc/sys/net/ipv6/conf/$IFACE/accept_ra
-        [ -n "$batman_inner" ] && [ -d /sys/class/net/$batman_inner ] &&
-            ip link set dev $batman_inner up &&
-            brctl addif $IFACE $batman_inner
+
+        # if configured, other (external) interfaces will be added to the bridge
+        (
+            local IFS=" ,\t\n"
+            for dev in $batman_inner; do
+                if [ -d /sys/class/net/$dev ]; then
+                    ip link set dev $dev up
+                    brctl addif $IFACE $dev
+                fi
+            done
+        )
         ;;
+
     $INET)
-        [ -n "$inet_mac" ] && ip link set dev $IFACE address $inet_mac
-        udhcpc -i eth0 -x hostname:$(hostname)
+        # set a fixed mac address when configured accordingly
+        if [ -n "$inet_mac" ]; then
+            ip link set dev $IFACE address $inet_mac
+        fi
+        # set either a fixed IP...
+        if [ -n "$inet_address" ]; then
+            ip address add "$inet_address" dev $IFACE
+            if [ -n "$inet_router" ]; then
+                ip route add default via $inet_router
+            fi
+            if [ -n "$inet_dns" ]; then
+                echo "nameserver $inet_dns" > /etc/resolv.conf
+            fi
+        else
+            # ...or request IP via dhcp
+            udhcpc -i eth0 -x hostname:$(hostname)
+        fi
         ;;
 esac
