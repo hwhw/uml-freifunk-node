@@ -1,0 +1,5 @@
+linux
+linux-*/
+root-modules/*
+instances/private/*
+*.o
