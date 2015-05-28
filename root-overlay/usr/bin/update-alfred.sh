@@ -1,5 +1,5 @@
 #!/bin/sh
-source /lib/kernel-params.sh
+source /etc/sysconfig.sh
 [ -n "$alfred_send_data" ] && [ "$alfred_send_data" == "1" ] || exit 0
 if [ "$batman_version" == "14" ]; then
     BPATH=batman_adv14

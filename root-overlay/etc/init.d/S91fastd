@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source /lib/kernel-params.sh
+source /etc/sysconfig.sh
 if [ "$fastd_enabled" != "1" ]; then
     echo "fastd is disabled."
     exit 0
@@ -17,9 +17,7 @@ case "$1" in
         if [ "$fastd_anon" == "1" ]; then
             VERIFY="on verify \"true\";"
         fi
-        if [ -z "$fastd_peers" ]; then
-            echo "key \"a2822c632f9bdf990d34d612341a2b564bb4785742e9780ca185393034c8559c\";" > /etc/fastd/peers/dummy
-        fi
+        echo "key \"a2822c632f9bdf990d34d612341a2b564bb4785742e9780ca185393034c8559c\";" > /etc/fastd/peers/dummy
         if [ -n "$fastd_limit" ]; then
             LIMIT="peer limit $fastd_limit;"
         fi
@@ -39,17 +37,6 @@ $VERIFY
 $LIMIT
 on up \"/etc/fastd/up.sh\";" > /etc/fastd/fastd.conf
 
-        echo -n $fastd_peers|awk '
-BEGIN {
-    RS=","
-    FS="@"
-}
-{
-    print "key \""$1"\";" >> "/etc/fastd/peers/"$3".conf"
-    if($2) {
-        print "remote "$2" \""$3"\" port "$4";" >> "/etc/fastd/peers/"$3".conf"
-    }
-}'
         umask 077
         start-stop-daemon -S -b -q -p /var/run/fastd.pid \
             --exec /usr/bin/fastd -- -c /etc/fastd/fastd.conf

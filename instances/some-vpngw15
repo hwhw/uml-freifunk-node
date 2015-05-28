@@ -1,0 +1,16 @@
+source instances/networked
+
+./start-network.sh ffgoe || exit 1
+umlparam eth1=vde,/tmp/vde-ffgoe
+
+MACAPPENDIX=08:15
+
+sysconfig fastd_enabled 1
+sysconfig fastd_port    12346
+sysconfig fastd_anon    1
+sysconfig fastd_mac     8e:ff:ff:ff:$MACAPPENDIX
+sysconfig fastd_secret  123456789012345678901e34c4bd949edb225260541e3cb2a3a13f36c4f621277
+sysconfig batman_role   server
+sysconfig batman_mac    1a:ff:ff:ff:$MACAPPENDIX
+sysconfig batman_inner  eth1
+sysconfig inet_mac      8e:0f:ff:ff:$MACAPPENDIX

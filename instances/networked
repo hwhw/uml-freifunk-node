@@ -1,0 +1,4 @@
+./start-network.sh || exit 1
+
+umlparam eth0=vde,/tmp/vde-default
+

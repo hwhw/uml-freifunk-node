@@ -1,5 +1,5 @@
 #!/bin/sh
-source /lib/kernel-params.sh
+source /etc/sysconfig.sh
 case "$1" in
   start)
         ifup bat0

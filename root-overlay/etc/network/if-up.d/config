@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source /lib/kernel-params.sh
+source /etc/sysconfig.sh
 INET=${inet_iface:=eth0}
 
 if [ "$batman_version" = "14" ]; then
@@ -17,7 +17,7 @@ case $IFACE in
 
         # other interfaces that contribute to the Mesh:
         (
-            local IFS=" ,\t\n"
+            local IFS=" ,"
             for dev in $batman_mesh; do
                 if [ -d /sys/class/net/$dev ]; then
                     ip link set dev $dev up
@@ -49,7 +49,7 @@ case $IFACE in
             # start batadv-vis
             start-stop-daemon -S -b -q -p /var/run/batadv-vis$SUFFIX.pid --exec /usr/sbin/batadv-vis$SUFFIX -- -i $IFACE -s
             # make sure that alfred's data is updated every 4 Minutes:
-            (crontab -l; echo "*/4 * * * * /usr/bin/update-alfred.sh") | crontab
+            (crontab -l 2>/dev/null || true; echo "*/4 * * * * /usr/bin/update-alfred.sh") | crontab -
         fi
         ;;
 
@@ -72,7 +72,7 @@ case $IFACE in
 
         # if configured, other (external) interfaces will be added to the bridge
         (
-            local IFS=" ,\t\n"
+            local IFS=" ,"
             for dev in $batman_inner; do
                 if [ -d /sys/class/net/$dev ]; then
                     ip link set dev $dev up

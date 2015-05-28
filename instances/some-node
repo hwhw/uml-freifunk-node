@@ -1,0 +1,33 @@
+source instances/networked
+./start-network.sh ffgoe || exit 1
+umlparam eth1=vde,/tmp/vde-ffgoe
+
+
+new_file /etc/fastd/peers/1.vpn.freifunk-goettingen.de <<EOT
+key "550af47507836d6684bddf0299c720a9a4ac08e62e53b23765d6d44c97f6ff8d";
+remote ipv4 "1.vpn.freifunk-goettingen.de" port 12345;
+EOT
+new_file /etc/fastd/peers/2.vpn.freifunk-goettingen.de <<EOT
+key "c296da27b87338fa247ceac17f5dc2bc39ec4182bfbb18f8c6e50eeae82bf65a";
+remote ipv4 "2.vpn.freifunk-goettingen.de" port 12345;
+EOT
+new_file /etc/fastd/peers/3.vpn.freifunk-goettingen.de <<EOT
+key "6c728976dd225bd69cc93da238b11d18f70028497ffbb8670351560ab2da6193";
+remote ipv4 "3.vpn.freifunk-goettingen.de" port 12345;
+EOT
+
+sysconfig fastd_enabled     1
+sysconfig fastd_limit       2
+
+sysconfig fastd_mac         8e:ff:ff:12:34:56
+sysconfig fastd_secret      1234567890ab53a1fe852291c93b4428da4e65b97649c6b995806830a0d02540
+
+sysconfig alfred_send_data  1
+
+sysconfig batman_version    14
+sysconfig batman_role       client
+
+sysconfig batman_mac        1a:ff:ff:12:34:56
+
+sysconfig batman_mesh       eth0
+sysconfig batman_inner      eth1

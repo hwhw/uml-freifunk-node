@@ -1,5 +1,5 @@
 #!/bin/sh
-source /lib/kernel-params.sh
+source /etc/sysconfig.sh
 if [ -n "$fastd_mac" ]; then
     ip link set dev $INTERFACE address $fastd_mac
 fi
