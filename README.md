@@ -13,6 +13,11 @@ Then build:
  ./build.sh
 ```
 
-Use the wrapper scripts (run-....sh) to start instances.
+Use the wrapper script (run.sh) to start instances.
+You'll want to use or adapt one of the instance scripts in instance/:
+
+```
+ ./run.sh instance/some-node
+```
 
 More documentation and examples are yet to come.
